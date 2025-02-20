@@ -2,28 +2,23 @@ import os
 import json
 import subprocess
 
-TESTS_DIR = "tests"
-FIXTURES_DIR = os.path.join(TESTS_DIR, "fixtures")
-MODULES_DIR = os.path.join(TESTS_DIR, "modules")
-STORIES_DIR = os.path.join(TESTS_DIR, "stories")
-PACKAGE_JSON = "package.json"
+ROOT_DIR = os.path.abspath(os.path.join(os.getcwd(), ".."))
+PACKAGE_JSON = os.path.join(ROOT_DIR, "package.json")
+TSCONFIG = os.path.join(ROOT_DIR, "tsconfig.json")
 
-os.makedirs(FIXTURES_DIR, exist_ok=True)
-os.makedirs(MODULES_DIR, exist_ok=True)
-os.makedirs(STORIES_DIR, exist_ok=True)
+package_manager = "{{ cookiecutter.package_manager }}".strip().lower()
 
-package_manager = "{{cookiecutter.package_manager}}".strip().lower()
+subprocess.run(["pwd"], cwd=ROOT_DIR, check=True)
 
 print(f"📦 Selected package manager: {package_manager}")
-
 print("📦 Installing Playwright...")
 
 if package_manager == "yarn":
-    subprocess.run(["yarn", "add", "-D", "playwright"], check=True)
-    subprocess.run(["yarn", "playwright", "install"], check=True)
+    subprocess.run(["yarn", "add", "-D", "playwright"], cwd=ROOT_DIR, check=True)
+    subprocess.run(["yarn", "playwright", "install"], cwd=ROOT_DIR, check=True)
 else:
-    subprocess.run(["npm", "install", "--save-dev", "playwright"], check=True)
-    subprocess.run(["npx", "playwright", "install"], check=True)
+    subprocess.run(["npm", "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True)
+    subprocess.run(["npx", "playwright", "install"], cwd=ROOT_DIR, check=True)
 
 if os.path.exists(PACKAGE_JSON):
     with open(PACKAGE_JSON, "r", encoding="utf-8") as f:
@@ -34,6 +29,7 @@ if os.path.exists(PACKAGE_JSON):
 
     playwright_scripts = {
         "e2e": "playwright test",
+        "e2e:ui": "playwright test --ui",
         "e2e:debug:chromium": "playwright test --project chromium --headed",
         "e2e:debug:firefox": "playwright test --project firefox --headed"
     }
@@ -45,6 +41,28 @@ if os.path.exists(PACKAGE_JSON):
 
     print("✅ Playwright scripts added to package.json")
 else:
-    print("⚠️ No package.json found! Please add the scripts manually.")
+    print("⚠️ No package.json found in the root directory! Please add the scripts manually.")
+
+
+if os.path.exists(TSCONFIG):
+    print("📝 Found tsconfig.json, updating paths...")
+
+    with open(TSCONFIG, "r", encoding="utf-8") as f:
+        tsconfig = json.load(f)
+
+    if "compilerOptions" not in tsconfig:
+        tsconfig["compilerOptions"] = {}
+
+    if "paths" not in tsconfig["compilerOptions"]:
+        tsconfig["compilerOptions"]["paths"] = {}
+
+    tsconfig["compilerOptions"]["paths"]["@tests/*"] = ["tests/*"]
+
+    with open(TSCONFIG, "w", encoding="utf-8") as f:
+        json.dump(tsconfig, f, indent=2)
+
+    print("✅ Successfully updated tsconfig.json with paths.")
+else:
+    print("⚠️ No tsconfig.json found, skipping path update.")
 
 print("🎭 Playwright setup complete!")
