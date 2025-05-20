@@ -17,7 +17,9 @@ if package_manager == "yarn":
     subprocess.run(["yarn", "add", "-D", "playwright"], cwd=ROOT_DIR, check=True)
     subprocess.run(["yarn", "playwright", "install"], cwd=ROOT_DIR, check=True)
 else:
-    subprocess.run(["npm", "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True)
+    subprocess.run(
+        ["npm", "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True
+    )
     subprocess.run(["npx", "playwright", "install"], cwd=ROOT_DIR, check=True)
 
 if os.path.exists(PACKAGE_JSON):
@@ -31,17 +33,30 @@ if os.path.exists(PACKAGE_JSON):
         "e2e": "playwright test",
         "e2e:ui": "playwright test --ui",
         "e2e:debug:chromium": "playwright test --project chromium --headed",
-        "e2e:debug:firefox": "playwright test --project firefox --headed"
+        "e2e:debug:firefox": "playwright test --project firefox --headed",
     }
 
-    package_data["scripts"].update({k: v for k, v in playwright_scripts.items() if k not in package_data["scripts"]})
+    package_data["scripts"].update(
+        {
+            k: v
+            for k, v in playwright_scripts.items()
+            if k not in package_data["scripts"]
+        }
+    )
 
     with open(PACKAGE_JSON, "w", encoding="utf-8") as f:
         json.dump(package_data, f, indent=2)
 
     print("✅ Playwright scripts added to package.json")
 else:
-    print("⚠️ No package.json found in the root directory! Please add the scripts manually.")
+    print("""
+          ⚠️  No package.json found in the root directory! Please add the scripts manually. ⚠️
+          
+            "e2e": "playwright test",
+            "e2e:ui": "playwright test --ui",
+            "e2e:debug:chromium": "playwright test --project chromium --headed",
+            "e2e:debug:firefox": "playwright test --project firefox --headed"
+          """)
 
 
 if os.path.exists(TSCONFIG):
@@ -63,6 +78,14 @@ if os.path.exists(TSCONFIG):
 
     print("✅ Successfully updated tsconfig.json with paths.")
 else:
-    print("⚠️ No tsconfig.json found, skipping path update.")
+    print("""
+           ⚠️  No tsconfig.json found, Add path updates manually. ⚠️
+          
+            "paths": {
+                ...current_paths...
+                "@tests/*": ["../tests/*"], <--- add this
+                ...current_paths...
+            },
+          """)
 
 print("🎭 Playwright setup complete!")

@@ -4,12 +4,14 @@
         "npm",
         "yarn"
     ],
+    "test_domain": "dev.is.sa",
     "__prompts__": {
         "folder_name": "Enter Tests Folder Name",
         "package_manager": {
             "__prompts__": "Select Project Package Manager",
             "npm": "NPM",
             "yarn": "YARN"
-        }
+        },
+        "test_domain": "Enter Project Domain, (UAT)"
     }
 }
