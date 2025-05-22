@@ -61,10 +61,22 @@ else:
 
 if os.path.exists(TSCONFIG):
     print("📝 Found tsconfig.json, updating paths...")
+    try:
+        with open(TSCONFIG, "r", encoding="utf-8") as f:
+            tsconfig = json.load(f)
+    except:
+        print("something went wrong when loading tsconfig, add below manually")
+        print("""
 
-    with open(TSCONFIG, "r", encoding="utf-8") as f:
-        tsconfig = json.load(f)
+                "paths": {
+                    ...current_paths...
+                    "@tests/*": ["../tests/*"], <--- add this
+                    ...current_paths...
+                },
 
+                """)
+        exit()
+    print("hfldjhsgj")
     if "compilerOptions" not in tsconfig:
         tsconfig["compilerOptions"] = {}
 
