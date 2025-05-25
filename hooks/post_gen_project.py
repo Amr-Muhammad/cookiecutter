@@ -5,6 +5,31 @@ import subprocess
 ROOT_DIR = os.path.abspath(os.path.join(os.getcwd(), ".."))
 PACKAGE_JSON = os.path.join(ROOT_DIR, "package.json")
 TSCONFIG = os.path.join(ROOT_DIR, "tsconfig.json")
+PLAYWRIGHT_CONFIG = os.path.join(ROOT_DIR, "playwright.config.ts")
+
+playwright_config_content = """
+import { defineConfig, devices } from "@playwright/test";
+import { config } from "./tests/core/config";
+
+export default defineConfig({
+    testDir: "./tests",
+    use: config,
+
+    projects: [
+        { name: "core", testMatch: /.*\\/core\\/auth\\.setup\\.ts$/ },
+        {
+            name: "chromium",
+            use: { ...devices["Desktop Chrome"] },
+            dependencies: ["core"],
+        },
+        {
+            name: "firefox",
+            use: { ...devices["Desktop Firefox"] },
+            dependencies: ["core"],
+        },
+    ],
+});
+""".strip()
 
 package_manager = "{{ cookiecutter.package_manager }}".strip().lower()
 
@@ -76,7 +101,6 @@ if os.path.exists(TSCONFIG):
 
                 """)
         exit()
-    print("hfldjhsgj")
     if "compilerOptions" not in tsconfig:
         tsconfig["compilerOptions"] = {}
 
@@ -99,5 +123,8 @@ else:
                 ...current_paths...
             },
           """)
+
+with open(PLAYWRIGHT_CONFIG, "w", encoding="utf-8") as f:
+    f.write(playwright_config_content + "\n")
 
 print("🎭 Playwright setup complete!")
