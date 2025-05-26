@@ -9,12 +9,11 @@ PLAYWRIGHT_CONFIG = os.path.join(ROOT_DIR, "playwright.config.ts")
 
 playwright_config_content = """
 import { defineConfig, devices } from "@playwright/test";
-import { config } from "./tests/core/config";
+import { config } from "@tests/config";
 
 export default defineConfig({
     testDir: "./tests",
     use: config,
-
     projects: [
         { name: "core", testMatch: /.*\\/core\\/auth\\.setup\\.ts$/ },
         {
@@ -41,6 +40,8 @@ print("📦 Installing Playwright...")
 if package_manager == "yarn":
     subprocess.run(["yarn", "add", "-D", "playwright"], cwd=ROOT_DIR, check=True)
     subprocess.run(["yarn", "playwright", "install"], cwd=ROOT_DIR, check=True)
+    subprocess.run(["yarn", "add", "-D", "@playwright/test"], cwd=ROOT_DIR, check=True)
+    subprocess.run(["yarn", "@playwright/test", "install"], cwd=ROOT_DIR, check=True)
 else:
     subprocess.run(
         ["npm", "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True
