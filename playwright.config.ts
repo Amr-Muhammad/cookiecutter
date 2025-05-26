@@ -1,10 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
-import { config } from "./tests/core/config";
+import { config } from "@tests/config";
 
 export default defineConfig({
     testDir: "./tests",
     use: config,
-
     projects: [
         { name: "core", testMatch: /.*\/core\/auth\.setup\.ts$/ },
         {

@@ -6,11 +6,9 @@ export class LoginModule {
     // Fields
     readonly email: Locator;
     readonly password: Locator;
-    readonly pinCode: Locator[];
 
     // Interactive
     readonly loginButton: Locator;
-    readonly pinCodeButton: Locator;
 
     constructor(page: Page) {
         this.page = page;

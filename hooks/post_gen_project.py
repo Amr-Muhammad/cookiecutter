@@ -95,7 +95,8 @@ if os.path.exists(TSCONFIG):
 
                 "paths": {
                     ...current_paths...
-                    "@tests/*": ["../tests/*"], <--- add this
+                    "@tests/*": ["./tests/*"], <--- add this
+                    "@tests/config": ["./tests/config.ts"], <--- add this
                     ...current_paths...
                 },
 
@@ -107,7 +108,8 @@ if os.path.exists(TSCONFIG):
     if "paths" not in tsconfig["compilerOptions"]:
         tsconfig["compilerOptions"]["paths"] = {}
 
-    tsconfig["compilerOptions"]["paths"]["@tests/*"] = ["tests/*"]
+    tsconfig["compilerOptions"]["paths"]["@tests/*"] = ["./tests/*"]
+    tsconfig["compilerOptions"]["paths"]["@tests/config"] = ["./tests/config.ts"]
 
     with open(TSCONFIG, "w", encoding="utf-8") as f:
         json.dump(tsconfig, f, indent=2)
@@ -119,7 +121,8 @@ else:
           
             "paths": {
                 ...current_paths...
-                "@tests/*": ["../tests/*"], <--- add this
+                "@tests/*": ["./tests/*"], <--- add this
+                "@tests/config": ["./tests/config.ts"], <--- add this
                 ...current_paths...
             },
           """)
