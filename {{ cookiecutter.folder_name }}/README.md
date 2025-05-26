@@ -12,7 +12,8 @@ tests
 │       └── login.ts <- login component class and locators
 └── core
     └── auth.setup.ts <- you will add different auth user here
-    └── config.ts <- you will never change this
+    └── index.<ts <- you will never change this
+└── config.ts <-  stores environment variables related to test
 ```
 
 We also have below commands to run different tests
