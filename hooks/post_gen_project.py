@@ -41,7 +41,6 @@ if package_manager == "yarn":
     subprocess.run(["yarn", "add", "-D", "playwright"], cwd=ROOT_DIR, check=True)
     subprocess.run(["yarn", "playwright", "install"], cwd=ROOT_DIR, check=True)
     subprocess.run(["yarn", "add", "-D", "@playwright/test"], cwd=ROOT_DIR, check=True)
-    subprocess.run(["yarn", "@playwright/test", "install"], cwd=ROOT_DIR, check=True)
 else:
     subprocess.run(
         ["npm", "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True
