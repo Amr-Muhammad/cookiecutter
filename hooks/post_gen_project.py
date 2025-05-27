@@ -9,12 +9,11 @@ PLAYWRIGHT_CONFIG = os.path.join(ROOT_DIR, "playwright.config.ts")
 
 playwright_config_content = """
 import { defineConfig, devices } from "@playwright/test";
-import { config } from "./tests/core/config";
+import { config } from "@tests/config";
 
 export default defineConfig({
     testDir: "./tests",
     use: config,
-
     projects: [
         { name: "core", testMatch: /.*\\/core\\/auth\\.setup\\.ts$/ },
         {
@@ -41,11 +40,15 @@ print("📦 Installing Playwright...")
 if package_manager == "yarn":
     subprocess.run(["yarn", "add", "-D", "playwright"], cwd=ROOT_DIR, check=True)
     subprocess.run(["yarn", "playwright", "install"], cwd=ROOT_DIR, check=True)
+    subprocess.run(["yarn", "add", "-D", "@playwright/test"], cwd=ROOT_DIR, check=True)
 else:
     subprocess.run(
         ["npm", "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True
     )
     subprocess.run(["npx", "playwright", "install"], cwd=ROOT_DIR, check=True)
+    subprocess.run(
+        ["npm", "install", "--save-dev", "@playwright/test"], cwd=ROOT_DIR, check=True
+    )
 
 if os.path.exists(PACKAGE_JSON):
     with open(PACKAGE_JSON, "r", encoding="utf-8") as f:
@@ -95,7 +98,8 @@ if os.path.exists(TSCONFIG):
 
                 "paths": {
                     ...current_paths...
-                    "@tests/*": ["../tests/*"], <--- add this
+                    "@tests/*": ["./tests/*"], <--- add this
+                    "@tests/config": ["./tests/config.ts"], <--- add this
                     ...current_paths...
                 },
 
@@ -107,7 +111,8 @@ if os.path.exists(TSCONFIG):
     if "paths" not in tsconfig["compilerOptions"]:
         tsconfig["compilerOptions"]["paths"] = {}
 
-    tsconfig["compilerOptions"]["paths"]["@tests/*"] = ["tests/*"]
+    tsconfig["compilerOptions"]["paths"]["@tests/*"] = ["./tests/*"]
+    tsconfig["compilerOptions"]["paths"]["@tests/config"] = ["./tests/config.ts"]
 
     with open(TSCONFIG, "w", encoding="utf-8") as f:
         json.dump(tsconfig, f, indent=2)
@@ -119,7 +124,8 @@ else:
           
             "paths": {
                 ...current_paths...
-                "@tests/*": ["../tests/*"], <--- add this
+                "@tests/*": ["./tests/*"], <--- add this
+                "@tests/config": ["./tests/config.ts"], <--- add this
                 ...current_paths...
             },
           """)
