@@ -46,6 +46,9 @@ else:
         ["npm", "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True
     )
     subprocess.run(["npx", "playwright", "install"], cwd=ROOT_DIR, check=True)
+    subprocess.run(
+        ["npm", "install", "--save-dev", "@playwright/test"], cwd=ROOT_DIR, check=True
+    )
 
 if os.path.exists(PACKAGE_JSON):
     with open(PACKAGE_JSON, "r", encoding="utf-8") as f:
