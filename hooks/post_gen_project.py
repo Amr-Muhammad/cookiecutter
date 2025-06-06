@@ -32,7 +32,7 @@ export default defineConfig({
 
 package_manager = "{{ cookiecutter.package_manager }}".strip().lower()
 
-subprocess.run(["pwd"], cwd=ROOT_DIR, check=True)
+# subprocess.run(["pwd"], cwd=ROOT_DIR, check=True)
 
 print(f"📦 Selected package manager: {package_manager}")
 print("📦 Installing Playwright...")
