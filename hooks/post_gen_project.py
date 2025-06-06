@@ -105,35 +105,49 @@ default_tsconfig = {
     }
 }
 
-if not os.path.exists(TSCONFIG):
-    print("⚠️ No tsconfig.json found. Creating a new one...")
-    with open(TSCONFIG, "w", encoding="utf-8") as f:
-        json.dump(default_tsconfig, f, indent=2)
-    print("✅ tsconfig.json created with Playwright paths.")
-else:
+if os.path.exists(TSCONFIG):
+    print("📝 Found tsconfig.json, updating paths...")
     try:
         with open(TSCONFIG, "r", encoding="utf-8") as f:
-            content = f.read().strip()
-            tsconfig = json.loads(content) if content else {}
+            tsconfig = json.load(f)
+    except:
+        print("something went wrong when loading tsconfig, add below manually")
+        print("""
 
-        if "compilerOptions" not in tsconfig:
-            tsconfig["compilerOptions"] = {}
+                "paths": {
+                    ...current_paths...
+                    "@tests/*": ["./tests/*"], <--- add this
+                    "@tests/config": ["./tests/config.ts"], <--- add this
+                    ...current_paths...
+                },
 
-        if "paths" not in tsconfig["compilerOptions"]:
-            tsconfig["compilerOptions"]["paths"] = {}
+                """)
+        exit()
+    if "compilerOptions" not in tsconfig:
+        tsconfig["compilerOptions"] = {}
 
-        tsconfig["compilerOptions"]["paths"]["@tests/*"] = ["./tests/*"]
-        tsconfig["compilerOptions"]["paths"]["@tests/config"] = ["./tests/config.ts"]
+    if "paths" not in tsconfig["compilerOptions"]:
+        tsconfig["compilerOptions"]["paths"] = {}
 
-        with open(TSCONFIG, "w", encoding="utf-8") as f:
-            json.dump(tsconfig, f, indent=2)
+    tsconfig["compilerOptions"]["paths"]["@tests/*"] = ["./tests/*"]
+    tsconfig["compilerOptions"]["paths"]["@tests/config"] = ["./tests/config.ts"]
 
-        print("✅ Successfully updated tsconfig.json with paths.")
-    except Exception as e:
-        print(f"❌ Failed to update tsconfig.json. Replacing with default. Error: {e}")
-        with open(TSCONFIG, "w", encoding="utf-8") as f:
-            json.dump(default_tsconfig, f, indent=2)
-        print("✅ tsconfig.json reset to default with Playwright paths.")
+    with open(TSCONFIG, "w", encoding="utf-8") as f:
+        json.dump(tsconfig, f, indent=2)
+
+    print("✅ Successfully updated tsconfig.json with paths.")
+else:
+    print("""
+           ⚠️  No tsconfig.json found, Add path updates manually. ⚠️
+          
+            "paths": {
+                ...current_paths...
+                "@tests/*": ["./tests/*"], <--- add this
+                "@tests/config": ["./tests/config.ts"], <--- add this
+                ...current_paths...
+            },
+          """)
+
 
 # Write Playwright config
 try:
