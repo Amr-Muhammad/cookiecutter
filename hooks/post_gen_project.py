@@ -36,7 +36,6 @@ package_manager = "{{ cookiecutter.package_manager }}".strip().lower()
 print(f"📦 Selected package manager: {package_manager}")
 print("📦 Installing Playwright...")
 
-# Resolve full paths to npm/npx/yarn
 npm_path = shutil.which("npm")
 npx_path = shutil.which("npx")
 yarn_path = shutil.which("yarn")
@@ -49,7 +48,6 @@ def run_safe(cmd, cwd):
     except subprocess.CalledProcessError as e:
         print(f"❌ Command failed: {' '.join(cmd)}\nError: {e}")
 
-# Run install commands based on package manager
 if package_manager == "yarn":
     if yarn_path:
         run_safe([yarn_path, "add", "-D", "playwright"], cwd=ROOT_DIR)
@@ -65,7 +63,7 @@ else:
     else:
         print("❌ npm or npx not found in PATH. Please install Node.js and try again.")
 
-# Update package.json with scripts
+# Update package.json
 if os.path.exists(PACKAGE_JSON):
     try:
         with open(PACKAGE_JSON, "r", encoding="utf-8") as f:
@@ -94,12 +92,29 @@ if os.path.exists(PACKAGE_JSON):
 else:
     print("⚠️ No package.json found! Add the Playwright scripts manually.")
 
-# Update tsconfig.json with paths
-if os.path.exists(TSCONFIG):
-    print("📝 Found tsconfig.json, updating paths...")
+# Create or fix tsconfig.json dynamically
+default_tsconfig = {
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "commonjs",
+        "baseUrl": "./",
+        "paths": {
+            "@tests/*": ["./tests/*"],
+            "@tests/config": ["./tests/config.ts"]
+        }
+    }
+}
+
+if not os.path.exists(TSCONFIG):
+    print("⚠️ No tsconfig.json found. Creating a new one...")
+    with open(TSCONFIG, "w", encoding="utf-8") as f:
+        json.dump(default_tsconfig, f, indent=2)
+    print("✅ tsconfig.json created with Playwright paths.")
+else:
     try:
         with open(TSCONFIG, "r", encoding="utf-8") as f:
-            tsconfig = json.load(f)
+            content = f.read().strip()
+            tsconfig = json.loads(content) if content else {}
 
         if "compilerOptions" not in tsconfig:
             tsconfig["compilerOptions"] = {}
@@ -115,11 +130,12 @@ if os.path.exists(TSCONFIG):
 
         print("✅ Successfully updated tsconfig.json with paths.")
     except Exception as e:
-        print(f"❌ Failed to update tsconfig.json: {e}")
-else:
-    print("⚠️ No tsconfig.json found. Add path updates manually.")
+        print(f"❌ Failed to update tsconfig.json. Replacing with default. Error: {e}")
+        with open(TSCONFIG, "w", encoding="utf-8") as f:
+            json.dump(default_tsconfig, f, indent=2)
+        print("✅ tsconfig.json reset to default with Playwright paths.")
 
-# Write playwright.config.ts
+# Write Playwright config
 try:
     with open(PLAYWRIGHT_CONFIG, "w", encoding="utf-8") as f:
         f.write(playwright_config_content + "\n")
