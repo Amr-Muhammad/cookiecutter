@@ -36,23 +36,36 @@ package_manager = "{{ cookiecutter.package_manager }}".strip().lower()
 print(f"📦 Selected package manager: {package_manager}")
 print("📦 Installing Playwright...")
 
-def run_safe(cmd, **kwargs):
+# Resolve full paths to npm/npx/yarn
+npm_path = shutil.which("npm")
+npx_path = shutil.which("npx")
+yarn_path = shutil.which("yarn")
+
+def run_safe(cmd, cwd):
     try:
-        subprocess.run(cmd, check=True, **kwargs)
+        subprocess.run(cmd, cwd=cwd, check=True)
     except FileNotFoundError:
         print(f"❌ Command not found: {' '.join(cmd)}")
     except subprocess.CalledProcessError as e:
         print(f"❌ Command failed: {' '.join(cmd)}\nError: {e}")
 
+# Run install commands based on package manager
 if package_manager == "yarn":
-    run_safe(["yarn", "add", "-D", "playwright"], cwd=ROOT_DIR)
-    run_safe(["yarn", "playwright", "install"], cwd=ROOT_DIR)
-    run_safe(["yarn", "add", "-D", "@playwright/test"], cwd=ROOT_DIR)
+    if yarn_path:
+        run_safe([yarn_path, "add", "-D", "playwright"], cwd=ROOT_DIR)
+        run_safe([yarn_path, "playwright", "install"], cwd=ROOT_DIR)
+        run_safe([yarn_path, "add", "-D", "@playwright/test"], cwd=ROOT_DIR)
+    else:
+        print("❌ Yarn not found in PATH.")
 else:
-    run_safe(["npm", "install", "--save-dev", "playwright"], cwd=ROOT_DIR)
-    run_safe(["npx", "playwright", "install"], cwd=ROOT_DIR)
-    run_safe(["npm", "install", "--save-dev", "@playwright/test"], cwd=ROOT_DIR)
+    if npm_path and npx_path:
+        run_safe([npm_path, "install", "--save-dev", "playwright"], cwd=ROOT_DIR)
+        run_safe([npx_path, "playwright", "install"], cwd=ROOT_DIR)
+        run_safe([npm_path, "install", "--save-dev", "@playwright/test"], cwd=ROOT_DIR)
+    else:
+        print("❌ npm or npx not found in PATH. Please install Node.js and try again.")
 
+# Update package.json with scripts
 if os.path.exists(PACKAGE_JSON):
     try:
         with open(PACKAGE_JSON, "r", encoding="utf-8") as f:
@@ -81,6 +94,7 @@ if os.path.exists(PACKAGE_JSON):
 else:
     print("⚠️ No package.json found! Add the Playwright scripts manually.")
 
+# Update tsconfig.json with paths
 if os.path.exists(TSCONFIG):
     print("📝 Found tsconfig.json, updating paths...")
     try:
@@ -105,6 +119,7 @@ if os.path.exists(TSCONFIG):
 else:
     print("⚠️ No tsconfig.json found. Add path updates manually.")
 
+# Write playwright.config.ts
 try:
     with open(PLAYWRIGHT_CONFIG, "w", encoding="utf-8") as f:
         f.write(playwright_config_content + "\n")
