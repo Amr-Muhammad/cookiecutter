@@ -35,7 +35,7 @@ cookiecutter git@github.com:Amr-Muhammad/cookiecutter.git -c js
 For `PYTHON`
 
 ```bash
-cookiecutter git@git.code.is.sa:internal/templates/playwright-cookiecutter.git -c python
+cookiecutter git@github.com:Amr-Muhammad/cookiecutter.git -c python
 ```
 
 After running the command you will be asked some questions and based on your answers it will generate
