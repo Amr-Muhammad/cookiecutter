@@ -29,7 +29,7 @@ To be able to use the template first you need access to it. Then you can copy th
 For `JS`
 
 ```bash
-cookiecutter git@git.code.is.sa:internal/templates/playwright-cookiecutter.git -c js
+cookiecutter git@github.com:Amr-Muhammad/cookiecutter.git -c js
 ```
 
 For `PYTHON`
