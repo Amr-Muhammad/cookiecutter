@@ -1,6 +1,7 @@
 import os
 import json
 import subprocess
+import shutil
 
 ROOT_DIR = os.path.abspath(os.path.join(os.getcwd(), ".."))
 PACKAGE_JSON = os.path.join(ROOT_DIR, "package.json")
