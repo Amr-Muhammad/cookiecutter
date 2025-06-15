@@ -32,6 +32,10 @@ export default defineConfig({
 
 package_manager = "{{ cookiecutter.package_manager }}".strip().lower()
 
+npm_path = shutil.which("npm")
+npx_path = shutil.which("npx")
+yarn_path = shutil.which("yarn")
+
 print(f"📦 Selected package manager: {package_manager}")
 print("📦 Installing Playwright...")
 
@@ -40,13 +44,17 @@ if package_manager == "yarn":
     subprocess.run(["yarn", "playwright", "install"], cwd=ROOT_DIR, check=True)
     subprocess.run(["yarn", "add", "-D", "@playwright/test"], cwd=ROOT_DIR, check=True)
 else:
-    subprocess.run(
+    if npm_path and npx_path:
+        subprocess.run(Add commentMore actions
         ["npm", "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True
     )
     subprocess.run(["npx", "playwright", "install"], cwd=ROOT_DIR, check=True)
     subprocess.run(
         ["npm", "install", "--save-dev", "@playwright/test"], cwd=ROOT_DIR, check=True
     )
+     print("npm or npx are found in PATH successfully.")
+    else:
+        print("❌ npm or npx not found in PATH. Please install Node.js and try again.")
 
 if os.path.exists(PACKAGE_JSON):
     with open(PACKAGE_JSON, "r", encoding="utf-8") as f:
