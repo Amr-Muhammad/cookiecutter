@@ -45,14 +45,10 @@ if package_manager == "yarn":
     subprocess.run(["yarn", "add", "-D", "@playwright/test"], cwd=ROOT_DIR, check=True)
 else:
     if npm_path and npx_path:
-        subprocess.run(Add commentMore actions
-        ["npm", "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True
-    )
-    subprocess.run(["npx", "playwright", "install"], cwd=ROOT_DIR, check=True)
-    subprocess.run(
-        ["npm", "install", "--save-dev", "@playwright/test"], cwd=ROOT_DIR, check=True
-    )
-     print("npm or npx are found in PATH successfully.")
+        subprocess.run(["npm", "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True)
+        subprocess.run(["npx", "playwright", "install"], cwd=ROOT_DIR, check=True)
+        subprocess.run(["npm", "install", "--save-dev", "@playwright/test"], cwd=ROOT_DIR, check=True)
+        print("npm or npx are found in PATH successfully.")
     else:
         print("❌ npm or npx not found in PATH. Please install Node.js and try again.")
 
