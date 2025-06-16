@@ -94,44 +94,63 @@ if os.path.exists(TSCONFIG):
     print("📝 Found tsconfig.json, updating paths...")
     try:
         with open(TSCONFIG, "r", encoding="utf-8") as f:
-            tsconfig = json.load(f)
-    except:
-        print("something went wrong when loading tsconfig, add below manually")
-        print("""
+            lines = f.readlines()
 
+        # Skip leading comments or blank lines
+        clean_lines = []
+        start_collecting = False
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith("{"):
+                start_collecting = True
+            if start_collecting:
+                clean_lines.append(line)
+
+        json_content = "".join(clean_lines).strip()
+        if not json_content:
+            print("❌ tsconfig.json is empty or only contains comments. Skipping update.")
+        else:
+            tsconfig = json.loads(json_content)
+
+            if "compilerOptions" not in tsconfig:
+                tsconfig["compilerOptions"] = {}
+
+            if "paths" not in tsconfig["compilerOptions"]:
+                tsconfig["compilerOptions"]["paths"] = {}
+
+            paths = tsconfig["compilerOptions"]["paths"]
+
+            # Only add missing keys
+            if "@tests/*" not in paths:
+                paths["@tests/*"] = ["./tests/*"]
+            if "@tests/config" not in paths:
+                paths["@tests/config"] = ["./tests/config.ts"]
+
+            with open(TSCONFIG, "w", encoding="utf-8") as f:
+                json.dump(tsconfig, f, indent=2)
+
+            print("✅ Successfully updated tsconfig.json with paths.")
+
+    except Exception as e:
+        print("❌ Failed to update tsconfig.json. Add manually if needed.")
+        print(f"Error: {e}")
+        print("""
                 "paths": {
                     ...current_paths...
-                    "@tests/*": ["./tests/*"], <--- add this
-                    "@tests/config": ["./tests/config.ts"], <--- add this
-                    ...current_paths...
+                    "@tests/*": ["./tests/*"],
+                    "@tests/config": ["./tests/config.ts"]
                 },
-
-                """)
-        exit()
-    if "compilerOptions" not in tsconfig:
-        tsconfig["compilerOptions"] = {}
-
-    if "paths" not in tsconfig["compilerOptions"]:
-        tsconfig["compilerOptions"]["paths"] = {}
-
-    tsconfig["compilerOptions"]["paths"]["@tests/*"] = ["./tests/*"]
-    tsconfig["compilerOptions"]["paths"]["@tests/config"] = ["./tests/config.ts"]
-
-    with open(TSCONFIG, "w", encoding="utf-8") as f:
-        json.dump(tsconfig, f, indent=2)
-
-    print("✅ Successfully updated tsconfig.json with paths.")
+        """)
 else:
     print("""
            ⚠️  No tsconfig.json found, Add path updates manually. ⚠️
           
             "paths": {
                 ...current_paths...
-                "@tests/*": ["./tests/*"], <--- add this
-                "@tests/config": ["./tests/config.ts"], <--- add this
-                ...current_paths...
+                "@tests/*": ["./tests/*"],
+                "@tests/config": ["./tests/config.ts"]
             },
-          """)
+    """)
 
 with open(PLAYWRIGHT_CONFIG, "w", encoding="utf-8") as f:
     f.write(playwright_config_content + "\n")
