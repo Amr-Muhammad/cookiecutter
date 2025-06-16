@@ -37,18 +37,46 @@ npm_path = shutil.which("npm")
 npx_path = shutil.which("npx")
 yarn_path = shutil.which("yarn")
 
+playwright_declared = False
+playwright_test_declared = False
+
 print(f"📦 Selected package manager: {package_manager}")
-print("📦 Installing Playwright...")
+
+if os.path.exists(PACKAGE_JSON):
+    with open(PACKAGE_JSON, "r", encoding="utf-8") as f:
+        package_data = json.load(f)
+        dev_deps = package_data.get("devDependencies", {})
+        playwright_declared = "playwright" in dev_deps
+        playwright_test_declared = "@playwright/test" in dev_deps
+
 if package_manager == "yarn":
-    subprocess.run([yarn_path, "add", "-D", "playwright"], cwd=ROOT_DIR, check=True)
-    subprocess.run([yarn_path, "playwright", "install"], cwd=ROOT_DIR, check=True)
-    subprocess.run([yarn_path, "add", "-D", "@playwright/test"], cwd=ROOT_DIR, check=True)
+    if yarn_path:
+        if not playwright_declared:
+            subprocess.run([yarn_path, "add", "-D", "playwright"], cwd=ROOT_DIR, check=True)
+            subprocess.run([yarn_path, "playwright", "install"], cwd=ROOT_DIR, check=True)
+            print("📦 Installing Playwright...")
+        else:
+            print("🎭 Playwright already declared in package.json. Skipping install.")
+        if not playwright_test_declared:
+            subprocess.run([yarn_path, "add", "-D", "@playwright/test"], cwd=ROOT_DIR, check=True)
+            print("📦 Installing Playwright tests...")
+        else:
+            print("✅ @playwright/test already declared. Skipping install.")
+    else:
+        print("❌ Yarn not found in PATH.")
 else:
     if npm_path and npx_path:
-        subprocess.run([npm_path, "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True)
-        subprocess.run([npx_path, "playwright", "install"], cwd=ROOT_DIR, check=True)
-        subprocess.run([npm_path, "install", "--save-dev", "@playwright/test"], cwd=ROOT_DIR, check=True)
-        print("npm or npx are found in PATH successfully.")
+        if not playwright_declared:
+            subprocess.run([npm_path, "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True)
+            subprocess.run([npx_path, "playwright", "install"], cwd=ROOT_DIR, check=True)
+            print("📦 Installing Playwright...")
+        else:
+            print("🎭 Playwright already declared in package.json. Skipping install.")
+        if not playwright_test_declared:
+            subprocess.run([npm_path, "install", "--save-dev", "@playwright/test"], cwd=ROOT_DIR, check=True)
+            print("📦 Installing Playwright tests...")
+        else:
+            print("✅ @playwright/test already declared. Skipping install.")
     else:
         print("❌ npm or npx not found in PATH. Please install Node.js and try again.")
 
@@ -151,7 +179,11 @@ else:
             },
     """)
 
-with open(PLAYWRIGHT_CONFIG, "w", encoding="utf-8") as f:
-    f.write(playwright_config_content + "\n")
+if not os.path.exists(PLAYWRIGHT_CONFIG):
+    with open(PLAYWRIGHT_CONFIG, "w", encoding="utf-8") as f:
+        f.write(playwright_config_content + "\n")
+    print("🎭 playwright.config.ts generated successfully.")
+else:
+    print("🎭 playwright.config.ts already exists. Skipping creation.")
 
-print("🎭 Playwright setup complete!")
+print("✅ Playwright setup complete!")
