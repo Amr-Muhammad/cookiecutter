@@ -37,13 +37,12 @@ npm_path = shutil.which("npm")
 npx_path = shutil.which("npx")
 yarn_path = shutil.which("yarn")
 
-subprocess.run(["pwd"], cwd=ROOT_DIR, check=True)
 print(f"📦 Selected package manager: {package_manager}")
 print("📦 Installing Playwright...")
 if package_manager == "yarn":
-    subprocess.run(["yarn", "add", "-D", "playwright"], cwd=ROOT_DIR, check=True)
-    subprocess.run(["yarn", "playwright", "install"], cwd=ROOT_DIR, check=True)
-    subprocess.run(["yarn", "add", "-D", "@playwright/test"], cwd=ROOT_DIR, check=True)
+    subprocess.run([yarn_path, "add", "-D", "playwright"], cwd=ROOT_DIR, check=True)
+    subprocess.run([yarn_path, "playwright", "install"], cwd=ROOT_DIR, check=True)
+    subprocess.run([yarn_path, "add", "-D", "@playwright/test"], cwd=ROOT_DIR, check=True)
 else:
     if npm_path and npx_path:
         subprocess.run([npm_path, "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True)
