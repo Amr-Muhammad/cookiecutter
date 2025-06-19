@@ -139,7 +139,9 @@ if os.path.exists(TSCONFIG):
 
         if not json_content:
             print("❌ tsconfig.json is empty or only contains comments. Skipping update.")
+            print("klam talete")
         else:
+            print("klam rab3")
             tsconfig = json.loads(json_content)
 
             if "compilerOptions" not in tsconfig:
