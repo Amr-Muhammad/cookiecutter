@@ -1,17 +1,20 @@
 {
-    "folder_name": "tests",
-    "package_manager": [
-        "npm",
-        "yarn"
-    ],
-    "test_domain": "https://dev.is.sa",
-    "__prompts__": {
-        "folder_name": "Enter Tests Folder Name",
-        "package_manager": {
-            "__prompts__": "Select Project Package Manager",
-            "npm": "NPM",
-            "yarn": "YARN"
-        },
-        "test_domain": "Enter Project Domain, (UAT)"
-    }
+  "folder_name": "tests",
+  "package_manager": [
+    "npm",
+    "yarn"
+  ],
+  "test_domain": "https://dev.is.sa",
+
+  "_copy_without_render": ["hooks/post_gen_project.py"],
+
+  "__prompts__": {
+    "folder_name": "Enter Tests Folder Name",
+    "package_manager": {
+      "__prompts__": "Select Project Package Manager",
+      "npm": "NPM",
+      "yarn": "YARN"
+    },
+    "test_domain": "Enter Project Domain, (UAT)"
+  }
 }
