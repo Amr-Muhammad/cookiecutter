@@ -5,9 +5,6 @@
     "yarn"
   ],
   "test_domain": "https://dev.is.sa",
-
-  "_copy_without_render": ["hooks/post_gen_project.py"],
-
   "__prompts__": {
     "folder_name": "Enter Tests Folder Name",
     "package_manager": {
