@@ -6,7 +6,7 @@
   ],
   "test_domain": "https://dev.is.sa",
 
-  "_copy_without_render": ["hooks/post_gen_project.py"],
+"_copy_without_render": ["hooks/post_gen_project.py.jinja"]
 
   "__prompts__": {
     "folder_name": "Enter Tests Folder Name",
