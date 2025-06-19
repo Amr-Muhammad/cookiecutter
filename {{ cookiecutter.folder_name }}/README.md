@@ -6,13 +6,18 @@ We will use playwright for testing e2e and we built below structure for it to be
 tests
 │
 ├── cases <- all actual tests
-│   └── login.ts <- login page tests
+│   └── login.spec.ts <- login page tests
 ├── components <- all components classes and locators
 │   └── auth
 │       └── login.ts <- login component class and locators
 └── core
 │   └── auth.setup.ts <- you will add different auth user here
-│   └── index.<ts <- you will never change this
+│   └── index.ts <- you will never change this
+│   └── helpers <-you will add different data reseter apis here
+└── .auth
+│   └── {role}-session.json <- session storage for the logged user
+└── test-data
+│   └── {fileName} <- different test data files
 └── config.ts <-  stores environment variables related to test
 ```
 

@@ -8,6 +8,48 @@ PACKAGE_JSON = os.path.join(ROOT_DIR, "package.json")
 TSCONFIG = os.path.join(ROOT_DIR, "tsconfig.json")
 PLAYWRIGHT_CONFIG = os.path.join(ROOT_DIR, "playwright.config.ts")
 
+# --- New: Generate dynamic config.ts based on user-defined roles ---
+CONFIG_TS_PATH = os.path.join(ROOT_DIR, "{{cookiecutter.folder_name}}", "config.ts")
+def generate_config_ts():
+    define_roles = input("Do you want to define project roles? (yes/no): ").strip().lower() or "yes"
+
+    user_entries = {}
+    if define_roles == "yes":
+        print("Enter each role (press Enter to finish):")
+        while True:
+            role = input("- Role: ").strip()
+            if not role:
+                break
+            user_entries[role] = {"email": "", "password": ""}
+    
+    credentials_block = ",\n".join([
+        f"        {json.dumps(role)}: {{ email: '', password: '' }}" for role in user_entries
+    ])
+
+    config_content = f"""export const config = {{
+  credentials: {{
+    users: {{
+{credentials_block if credentials_block else '    // no roles defined'}
+    }}
+  }},
+  paths: {{
+    baseUrl: '',
+    adminLoginPath: '',
+    normalUserLoginPath: ''
+  }}
+}};
+"""
+
+    os.makedirs(os.path.dirname(CONFIG_TS_PATH), exist_ok=True)
+    with open(CONFIG_TS_PATH, "w", encoding="utf-8") as f:
+        f.write(config_content)
+
+    print("🛠 config.ts generated based on user roles.")
+
+# --- Call new config generator at the top of the script ---
+generate_config_ts()
+
+
 playwright_config_content = """
 import { defineConfig, devices } from "@playwright/test";
 import { config } from "@tests/config";
