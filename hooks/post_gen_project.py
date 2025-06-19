@@ -122,7 +122,7 @@ if os.path.exists(TSCONFIG):
     try:
         with open(TSCONFIG, "r", encoding="utf-8") as f:
             lines = f.readlines()
-    print("1")
+    print("klam")
 
         # Skip leading comments or blank lines
         clean_lines = []
@@ -135,7 +135,7 @@ if os.path.exists(TSCONFIG):
                 clean_lines.append(line)
 
         json_content = "".join(clean_lines).strip()
-    print("2")
+    print("klam tany")
 
         if not json_content:
             print("❌ tsconfig.json is empty or only contains comments. Skipping update.")
