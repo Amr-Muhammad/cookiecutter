@@ -13,7 +13,7 @@ CONFIG_TS = os.path.join(ROOT_DIR, FOLDER, "config.ts")
 def gen_config():
     define = input("Define project roles? (yes/no) [yes]: ").strip().lower() or "yes"
     entries = {}
-    if define == "yes":
+    if define == "yes"
         print("Enter roles, one per line (blank to finish):")
         while True:
             role = input("- Role: ").strip()
