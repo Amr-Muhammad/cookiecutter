@@ -9,7 +9,7 @@ TSCONFIG = os.path.join(ROOT_DIR, "tsconfig.json")
 PLAYWRIGHT_CONFIG = os.path.join(ROOT_DIR, "playwright.config.ts")
 
 # --- New: Generate dynamic config.ts based on user-defined roles ---
-CONFIG_TS_PATH = os.path.join(ROOT_DIR, "{{cookiecutter.folder_name}}", "config.ts")
+CONFIG_TS_PATH = os.path.join(ROOT_DIR, "{{'{{cookiecutter.folder_name}}'}}", "config.ts")
 def generate_config_ts():
     define_roles = input("Do you want to define project roles? (yes/no): ").strip().lower() or "yes"
 
