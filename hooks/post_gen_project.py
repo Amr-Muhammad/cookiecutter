@@ -1,7 +1,8 @@
 import os
-import json
 import subprocess
 import shutil
+import json
+import commentjson  # ✅ allows trailing commas & comments
 
 ROOT_DIR = os.path.abspath(os.path.join(os.getcwd(), ".."))
 PACKAGE_JSON = os.path.join(ROOT_DIR, "package.json")
@@ -121,47 +122,25 @@ if os.path.exists(TSCONFIG):
     print("📝 Found tsconfig.json, updating paths...")
     try:
         with open(TSCONFIG, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-            print("klam")
+            tsconfig = commentjson.load(f)  # ✅ use commentjson to safely parse
 
-        # Skip leading comments or blank lines
-        clean_lines = []
-        start_collecting = False
-        for line in lines:
-            stripped = line.strip()
-            if stripped.startswith("{"):
-                start_collecting = True
-            if start_collecting:
-                clean_lines.append(line)
+        if "compilerOptions" not in tsconfig:
+            tsconfig["compilerOptions"] = {}
 
-        json_content = "".join(clean_lines).strip()
-        print("klam tany")
+        if "paths" not in tsconfig["compilerOptions"]:
+            tsconfig["compilerOptions"]["paths"] = {}
 
-        if not json_content:
-            print("❌ tsconfig.json is empty or only contains comments. Skipping update.")
-            print("klam talete")
-        else:
-            print("klam rab3")
-            tsconfig = json.loads(json_content)
+        paths = tsconfig["compilerOptions"]["paths"]
 
-            if "compilerOptions" not in tsconfig:
-                tsconfig["compilerOptions"] = {}
+        if "@tests/*" not in paths:
+            paths["@tests/*"] = ["./tests/*"]
+        if "@tests/config" not in paths:
+            paths["@tests/config"] = ["./tests/config.ts"]
 
-            if "paths" not in tsconfig["compilerOptions"]:
-                tsconfig["compilerOptions"]["paths"] = {}
+        with open(TSCONFIG, "w", encoding="utf-8") as f:
+            json.dump(tsconfig, f, indent=2)
 
-            paths = tsconfig["compilerOptions"]["paths"]
-
-            # Only add missing keys
-            if "@tests/*" not in paths:
-                paths["@tests/*"] = ["./tests/*"]
-            if "@tests/config" not in paths:
-                paths["@tests/config"] = ["./tests/config.ts"]
-
-            with open(TSCONFIG, "w", encoding="utf-8") as f:
-                json.dump(tsconfig, f, indent=2)
-
-            print("✅ Successfully updated tsconfig.json with paths.")
+        print("✅ Successfully updated tsconfig.json with paths.")
 
     except Exception as e:
         print("❌ Failed to update tsconfig.json. Add manually if needed.")
