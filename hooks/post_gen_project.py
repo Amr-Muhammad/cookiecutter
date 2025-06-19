@@ -13,21 +13,24 @@ import { defineConfig, devices } from "@playwright/test";
 import { config } from "@tests/config";
 
 export default defineConfig({
-    testDir: "./tests",
-    use: config,
-    projects: [
-        { name: "core", testMatch: /.*\\/core\\/auth\\.setup\\.ts$/ },
-        {
-            name: "chromium",
-            use: { ...devices["Desktop Chrome"] },
-            dependencies: ["core"],
-        },
-        {
-            name: "firefox",
-            use: { ...devices["Desktop Firefox"] },
-            dependencies: ["core"],
-        },
-    ],
+  testDir: "./tests",
+  use: config,
+  projects: [
+    {
+      name: "core",
+      testMatch: /.*\\/core\\/auth\\.setup\\.ts$/
+    },
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+      dependencies: ["core"]
+    },
+    {
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
+      dependencies: ["core"]
+    }
+  ]
 });
 """.strip()
 
@@ -54,76 +57,41 @@ if package_manager == "yarn":
         if not playwright_declared:
             subprocess.run([yarn_path, "add", "-D", "playwright"], cwd=ROOT_DIR, check=True)
             subprocess.run([yarn_path, "playwright", "install"], cwd=ROOT_DIR, check=True)
-            print("📦 Installing Playwright...")
-        else:
-            print("🎭 Playwright already declared in package.json. Skipping install.")
         if not playwright_test_declared:
             subprocess.run([yarn_path, "add", "-D", "@playwright/test"], cwd=ROOT_DIR, check=True)
-            print("📦 Installing Playwright tests...")
-        else:
-            print("✅ @playwright/test already declared. Skipping install.")
     else:
-        print("❌ Yarn not found in PATH.")
+        print("❌ Yarn not found.")
 else:
     if npm_path and npx_path:
         if not playwright_declared:
             subprocess.run([npm_path, "install", "--save-dev", "playwright"], cwd=ROOT_DIR, check=True)
             subprocess.run([npx_path, "playwright", "install"], cwd=ROOT_DIR, check=True)
-            print("📦 Installing Playwright...")
-        else:
-            print("🎭 Playwright already declared in package.json. Skipping install.")
         if not playwright_test_declared:
             subprocess.run([npm_path, "install", "--save-dev", "@playwright/test"], cwd=ROOT_DIR, check=True)
-            print("📦 Installing Playwright tests...")
-        else:
-            print("✅ @playwright/test already declared. Skipping install.")
     else:
-        print("❌ npm or npx not found in PATH. Please install Node.js and try again.")
+        print("❌ npm or npx not found. Please install Node.js.")
 
+# ✅ patch package.json scripts
 if os.path.exists(PACKAGE_JSON):
-    with open(PACKAGE_JSON, "r", encoding="utf-8") as f:
+    with open(PACKAGE_JSON, "r+", encoding="utf-8") as f:
         package_data = json.load(f)
-
-    if "scripts" not in package_data:
-        package_data["scripts"] = {}
-
-    playwright_scripts = {
-        "e2e": "playwright test",
-        "e2e:ui": "playwright test --ui",
-        "e2e:debug:chromium": "playwright test --project chromium --headed",
-        "e2e:debug:firefox": "playwright test --project firefox --headed",
-    }
-
-    package_data["scripts"].update(
-        {
-            k: v
-            for k, v in playwright_scripts.items()
-            if k not in package_data["scripts"]
-        }
-    )
-
-    with open(PACKAGE_JSON, "w", encoding="utf-8") as f:
-        json.dump(package_data, f, indent=2)
-
-    print("✅ Playwright scripts added to package.json")
-else:
-    print("""
-          ⚠️  No package.json found in the root directory! Please add the scripts manually. ⚠️
-          
+        s = package_data.setdefault("scripts", {})
+        for k, v in {
             "e2e": "playwright test",
             "e2e:ui": "playwright test --ui",
             "e2e:debug:chromium": "playwright test --project chromium --headed",
             "e2e:debug:firefox": "playwright test --project firefox --headed"
-          """)
+        }.items():
+            s.setdefault(k, v)
+        f.seek(0); json.dump(package_data, f, indent=2); f.truncate()
+    print("✅ Scripts added to package.json.")
 
-
+# ✅ patch tsconfig.json paths
 if os.path.exists(TSCONFIG):
-    print("📝 Found tsconfig.json, updating paths...")
     try:
         with open(TSCONFIG, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
-        # Skip leading comments or blank lines
         clean_lines = []
         start_collecting = False
         for line in lines:
@@ -135,55 +103,32 @@ if os.path.exists(TSCONFIG):
 
         json_content = "".join(clean_lines).strip()
         if not json_content:
-            print("❌ tsconfig.json is empty or only contains comments. Skipping update.")
+            print("❌ tsconfig.json is empty.")
         else:
             tsconfig = json.loads(json_content)
-
             if "compilerOptions" not in tsconfig:
                 tsconfig["compilerOptions"] = {}
-
             if "paths" not in tsconfig["compilerOptions"]:
                 tsconfig["compilerOptions"]["paths"] = {}
 
             paths = tsconfig["compilerOptions"]["paths"]
-
-            # Only add missing keys
-            if "@tests/*" not in paths:
-                paths["@tests/*"] = ["./tests/*"]
-            if "@tests/config" not in paths:
-                paths["@tests/config"] = ["./tests/config.ts"]
+            paths.setdefault("@tests/*", ["./tests/*"])
+            paths.setdefault("@tests/config", ["./tests/config.ts"])
 
             with open(TSCONFIG, "w", encoding="utf-8") as f:
                 json.dump(tsconfig, f, indent=2)
 
-            print("✅ Successfully updated tsconfig.json with paths.")
+            print("✅ tsconfig paths updated.")
 
     except Exception as e:
-        print("❌ Failed to update tsconfig.json. Add manually if needed.")
-        print(f"Error: {e}")
-        print("""
-                "paths": {
-                    ...current_paths...
-                    "@tests/*": ["./tests/*"],
-                    "@tests/config": ["./tests/config.ts"]
-                },
-        """)
-else:
-    print("""
-           ⚠️  No tsconfig.json found, Add path updates manually. ⚠️
-          
-            "paths": {
-                ...current_paths...
-                "@tests/*": ["./tests/*"],
-                "@tests/config": ["./tests/config.ts"]
-            },
-    """)
+        print(f"❌ Failed to patch tsconfig.json: {e}")
 
+# ✅ create playwright.config.ts if missing
 if not os.path.exists(PLAYWRIGHT_CONFIG):
     with open(PLAYWRIGHT_CONFIG, "w", encoding="utf-8") as f:
         f.write(playwright_config_content + "\n")
-    print("🎭 playwright.config.ts generated successfully.")
+    print("🎭 playwright.config.ts created.")
 else:
-    print("🎭 playwright.config.ts already exists. Skipping creation.")
+    print("🎭 playwright.config.ts already exists.")
 
 print("✅ Playwright setup complete!")
